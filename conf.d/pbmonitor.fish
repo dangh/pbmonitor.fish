@@ -1,21 +1,40 @@
-function pbmonitor-init
-  ~/.config/fish/conf.d/pbmonitor | while read --null --local clipboard
-    emit clipboard_change "$clipboard"
+function pbmonitor-fish
+  set --local pidfile {$TMPDIR}pbmonitor.pid
+  pgrep -qF "$pidfile" 2>/dev/null && return
+  echo $fish_pid > $pidfile
 
-    # exit if monitor is the last process
-    set --query --universal pbmonitor_autokill \
-      && test (count (pgrep fish)) -eq 0 \
-      && killall -9 pbmonitor
+  set --local clip0
+  while pbpaste | read --null --local clip
+    if test "$clip0" != "$clip"
+      set clip0 "$clip"
+      emit clipboard_change "$clip"
+    end
+
+    # exit if this is the last fish process
+    test (count (pgrep -U (id -u) fish)) -eq 0 \
+      && ! kill -0 (ps -o ppid= -p $fish_pid) \
+      && break
+
+    sleep 0.1
   end
 end
 
-# ensure only one monitor is running
-set --local pidfile (dirname (mktemp -u))/pbmonitor.pid
-if test -f $pidfile
-  set --local pid (command cat $pidfile)
-  kill -0 "$pid" 2>/dev/null && exit
+function pbmonitor-native
+  set --local pidfile {$TMPDIR}pbmonitor.pid
+  pgrep -qF "$pidfile" 2>/dev/null && return
+  echo $fish_pid > $pidfile
+  set --local pbmonitor (dirname (status --current-filename))/pbmonitor
+  $pbmonitor | while read --null --local clip
+    emit clipboard_change "$clip"
+  end
 end
-printf %self > $pidfile
 
-nohup fish --private --command 'pbmonitor-init' >/dev/null &
+status is-interactive || exit
+
+function _pbmonitor_refresh --on-event pbmonitor_install --on-event pbmonitor_update --on-event pbmonitor_uninstall
+  pkill -9 -F "$pidfile" >/dev/null 2>&1 &
+  pkill -9 -U (id -u) pbmonitor &
+end
+
+nohup fish --private --command 'pbmonitor-native' >/dev/null 2>&1 &
 disown
