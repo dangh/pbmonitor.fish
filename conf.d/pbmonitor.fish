@@ -23,8 +23,7 @@ function pbmonitor-native
   set --local pidfile {$TMPDIR}pbmonitor.pid
   pgrep -qF "$pidfile" 2>/dev/null && return
   echo $fish_pid > $pidfile
-  set --local pbmonitor (dirname (status --current-filename))/pbmonitor
-  $pbmonitor | while read --null --local clip
+  $__fish_config_dir/conf.d/pbmonitor | while read --null --local clip
     emit clipboard_change "$clip"
   end
 end
