@@ -23,7 +23,7 @@ function pbmonitor-native
   set --local pidfile {$TMPDIR}pbmonitor.pid
   pgrep -qF "$pidfile" 2>/dev/null && return
   echo $fish_pid > $pidfile
-  $__fish_config_dir/conf.d/pbmonitor | while read --null --local clip
+  command pbmonitor | while read --null --local clip
     emit clipboard_change "$clip"
   end
 end
@@ -35,5 +35,5 @@ function _pbmonitor_refresh --on-event pbmonitor_install --on-event pbmonitor_up
   pkill -9 -U (id -u) pbmonitor &
 end
 
-nohup fish --private --command 'pbmonitor-native' >/dev/null 2>&1 &
+nohup fish --private --command 'which pbmonitor && pbmonitor-native || pbmonitor-fish' >/dev/null 2>&1 &
 disown

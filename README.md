@@ -3,6 +3,7 @@
 ### Installation
 
 ```fish
+brew install dangh/formulae/pbmonitor
 fisher install dangh/pbmonitor.fish
 ```
 
