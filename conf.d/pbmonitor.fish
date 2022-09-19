@@ -1,10 +1,10 @@
 function pbmonitor-fish
-  set --local pidfile {$TMPDIR}pbmonitor.pid
+  set -l pidfile {$TMPDIR}pbmonitor.pid
   pgrep -qF "$pidfile" 2>/dev/null && return
   echo $fish_pid > $pidfile
 
-  set --local clip0
-  while pbpaste | read --null --local clip
+  set -l clip0
+  while pbpaste | read -l -z clip
     if test "$clip0" != "$clip"
       set clip0 "$clip"
       emit clipboard_change "$clip"
@@ -20,20 +20,20 @@ function pbmonitor-fish
 end
 
 function pbmonitor-native
-  set --local pidfile {$TMPDIR}pbmonitor.pid
+  set -l pidfile {$TMPDIR}pbmonitor.pid
   pgrep -qF "$pidfile" 2>/dev/null && return
   echo $fish_pid > $pidfile
-  command pbmonitor | while read --null --local clip
+  command pbmonitor | while read -l -z clip
     emit clipboard_change "$clip"
   end
 end
 
 status is-interactive || exit
 
-function _pbmonitor_refresh --on-event pbmonitor_install --on-event pbmonitor_update --on-event pbmonitor_uninstall
+function _pbmonitor_refresh -e pbmonitor_install -e pbmonitor_update -e pbmonitor_uninstall
   pkill -9 -F "$pidfile" >/dev/null 2>&1 &
   pkill -9 -U (id -u) pbmonitor &
 end
 
-nohup fish --private --command 'which pbmonitor && pbmonitor-native || pbmonitor-fish' >/dev/null 2>&1 &
+nohup fish -P -c 'which pbmonitor && pbmonitor-native || pbmonitor-fish' >/dev/null 2>&1 &
 disown
