@@ -35,5 +35,5 @@ function _pbmonitor_refresh -e pbmonitor_install -e pbmonitor_update -e pbmonito
   pkill -9 -U (id -u) pbmonitor &
 end
 
-nohup fish -P -c 'which pbmonitor && pbmonitor-native || pbmonitor-fish' >/dev/null 2>&1 &
+nohup fish -P -c 'type -q pbmonitor && pbmonitor-native || pbmonitor-fish' >/dev/null 2>&1 &
 disown
