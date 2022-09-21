@@ -1,6 +1,6 @@
 function pbmonitor-fish
   set -l pidfile {$TMPDIR}pbmonitor.pid
-  pgrep -qF "$pidfile" 2>/dev/null && return
+  test -f $pidfile && kill -0 (cat "$pidfile") 2>/dev/null && return
   echo $fish_pid > $pidfile
 
   set -l clip0
@@ -21,7 +21,7 @@ end
 
 function pbmonitor-native
   set -l pidfile {$TMPDIR}pbmonitor.pid
-  pgrep -qF "$pidfile" 2>/dev/null && return
+  test -f $pidfile && kill -0 (cat "$pidfile") 2>/dev/null && return
   echo $fish_pid > $pidfile
   command pbmonitor | while read -l -z clip
     emit clipboard_change "$clip"
