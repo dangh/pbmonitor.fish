@@ -4,7 +4,7 @@
 
 ```fish
 brew install dangh/formulae/pbmonitor
-fisher install dangh/flock.fish dangh/pbmonitor.fish
+fisher install dangh/pbmonitor.fish
 ```
 
 ### Usage
